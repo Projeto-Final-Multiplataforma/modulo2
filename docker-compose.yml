@@ -1,0 +1,31 @@
+version: '3.8'
+
+services:
+  mysql:
+    image: mysql:8.0
+    environment:
+      MYSQL_ALLOW_EMPTY_PASSWORD: "yes"
+      MYSQL_DATABASE: "modulo2"
+    ports:
+      - "3306:3306"
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      timeout: 5s
+      retries: 10
+
+  gateway:
+    build: ./gateway_app
+    container_name: gateway_app
+    ports:
+      - "8080:8080"
+    depends_on:
+      - login
+    restart: on-failure
+
+  login:
+    build: ./login
+    container_name: login
+    depends_on:
+      mysql:
+        condition: service_healthy
+    restart: on-failure
